@@ -22,6 +22,8 @@ Module.register('MMM-MyCommute', {
     endTime: '23:59',
     hideDays: [],
     showSummary: true,
+    showDistanceInSummary: true,
+    metricDistance: true,
     colorCodeTravelTime: true,
     moderateTimeThreshold: 1.1,
     poorTimeThreshold: 1.3,
@@ -310,18 +312,18 @@ Module.register('MMM-MyCommute', {
 
   },
 
-  timeToString: function(time) {
-    var result = "";
-    var totalSeconds = Number(time);
-    var hours = Math.floor(totalSeconds / 60 / 60);
-    if (hours > 0) {
-      result = "" + hours + " h"
-    }
-    var minutes = Math.round(totalSeconds / 60) - hours * 60;
-    if (minutes > 0) {
-      result += " " + minutes + " min";
-    }
-    return result;
+  formatDistance: function(distance) {
+
+    var formattedDistance = this.config.metricDistance ? 
+      Math.round(distance / 1000) + " km" :
+      Math.round(distance / 1609.34) + " mi";
+
+    var distanceEl = document.createElement("span");
+    distanceEl.classList.add("travel-distance");
+    distanceEl.innerHTML = formattedDistance;
+
+    return distanceEl;
+
   },
 
   getTransitIcon: function(dest, route) {
@@ -352,7 +354,7 @@ Module.register('MMM-MyCommute', {
         transitLeg.appendChild(this.svgIconFactory(this.symbols[transitInfo[i].vehicle.toLowerCase()]));
 
       var routeNumber = document.createElement("span");
-        routeNumber.innerHTML = transitInfo[i].routeLabel;
+      routeNumber.innerHTML = transitInfo[i].routeLabel;
 
       if (transitInfo[i].arrivalTime) {
         routeNumber.innerHTML = routeNumber.innerHTML + " (" + moment(transitInfo[i].arrivalTime).format(this.config.nextTransitVehicleDepartureFormat) + ")";
@@ -415,6 +417,10 @@ Module.register('MMM-MyCommute', {
 
         row.appendChild( this.formatTime(r.time, r.timeInTraffic) );
 
+        if (this.config.showDistanceInSummary && r.distance) {
+          row.appendChild( this.formatDistance(r.distance) )
+        }
+
         //summary?
         if (this.config.showSummary) {
           var summary = document.createElement("div");
@@ -444,8 +450,12 @@ Module.register('MMM-MyCommute', {
 
           routeSummaryOuter.appendChild( this.formatTime(r.time, r.timeInTraffic) );
 
+          if (this.config.showDistanceInSummary && r.distance) {
+            routeSummaryOuter.appendChild( this.formatDistance(r.distance) )
+          }
+
           var summary = document.createElement("div");
-            summary.classList.add("route-summary");
+          summary.classList.add("route-summary");
 
           if (r.transitInfo) {
             symbolIcon = this.getTransitIcon(p.config,r);
