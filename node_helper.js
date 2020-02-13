@@ -72,9 +72,10 @@ module.exports = NodeHelper.create({
                     var arrivalTime = '';
                     if (!gotFirstTransitLeg && dest.config.showNextVehicleDeparture) {
                       gotFirstTransitLeg = true;
-                      arrivalTime = ' <span class="transit-arrival-time">(next at ' + s.transit_details.departure_time.text + ')</span>';
+                      // arrivalTime = ' <span class="transit-arrival-time">(next at ' + s.transit_details.departure_time.text + ')</span>';
+                      arrivalTime = moment(s.transit_details.departure_time.value * 1000);
                     }
-                    transitInfo.push({routeLabel: s.transit_details.line.short_name + arrivalTime, vehicle: s.transit_details.line.vehicle.type});
+                    transitInfo.push({routeLabel: s.transit_details.line.short_name ? s.transit_details.line.short_name : s.transit_details.line.name, vehicle: s.transit_details.line.vehicle.type, arrivalTime: arrivalTime});
                   }
                   routeObj.transitInfo = transitInfo;
                 }

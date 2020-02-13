@@ -25,6 +25,10 @@ Module.register('MMM-MyCommute', {
     colorCodeTravelTime: true,
     moderateTimeThreshold: 1.1,
     poorTimeThreshold: 1.3,
+    nextTransitVehicleDepartureFormat: "[next at] h:mm a",
+    travelTimeFormat: "m [min]",
+    travelTimeFormatTrim: "left",
+    pollFrequency: 10 * 60 * 1000, //every ten minutes, in milliseconds
     destinations: [
       {
         destination: '40 Bay St, Toronto, ON M5J 2X2',
@@ -56,7 +60,7 @@ Module.register('MMM-MyCommute', {
 
   // Define required scripts.
   getScripts: function() {
-    return ["moment.js"];
+    return ["moment.js", this.file("node_modules/moment-duration-format/lib/moment-duration-format.js")];
   },
   
   // Define required styles.
@@ -115,17 +119,6 @@ Module.register('MMM-MyCommute', {
     'other':            'streetcar'
   },  
 
-  /*
-    Poll Frequency
-
-    Be careful with this!  We're using Google's free API
-    which has a maximum of 2400 requests per day.  Each
-    entry in the destinations list requires its own request
-    so if you set this to be too frequent, it's pretty
-    easy to blow your request quota.
-  */
-  POLL_FREQUENCY : 10 * 60 * 1000, //poll every 10 minutes
-
   start: function() {
 
     Log.info('Starting module: ' + this.name);
@@ -139,8 +132,8 @@ Module.register('MMM-MyCommute', {
     this.getData();
     var self = this;
     setInterval(function() {
-      self.getData()
-    }, this.POLL_FREQUENCY);
+      self.getData();
+    }, this.config.pollFrequency);
       
   },
 
@@ -196,7 +189,7 @@ Module.register('MMM-MyCommute', {
         if ( this.isInWindow( destStartTime, destEndTime, destHideDays ) ) {
           var url = 'https://maps.googleapis.com/maps/api/directions/json' + this.getParams(d);
           destinations.push({ url:url, config: d});
-          // console.log(url);          
+          console.log(url);          
         }
 
       }
@@ -295,7 +288,7 @@ Module.register('MMM-MyCommute', {
     var timeEl = document.createElement("span");
     timeEl.classList.add("travel-time");
     if (timeInTraffic != null) {
-      timeEl.innerHTML = this.timeToString(timeInTraffic);
+      timeEl.innerHTML = moment.duration(Number(timeInTraffic), "seconds").format(this.config.travelTimeFormat, {trim: this.config.travelTimeFormatTrim});
 
       var variance = timeInTraffic / time;
       if (this.config.colorCodeTravelTime) {            
@@ -309,7 +302,7 @@ Module.register('MMM-MyCommute', {
       }
 
     } else {
-      timeEl.innerHTML = this.timeToString(time);
+      timeEl.innerHTML = moment.duration(Number(time), "seconds").format(this.config.travelTimeFormat, {trim: this.config.travelTimeFormatTrim});
       timeEl.classList.add("status-good");
     }
 
@@ -360,6 +353,10 @@ Module.register('MMM-MyCommute', {
 
       var routeNumber = document.createElement("span");
         routeNumber.innerHTML = transitInfo[i].routeLabel;
+
+      if (transitInfo[i].arrivalTime) {
+        routeNumber.innerHTML = routeNumber.innerHTML + " (" + moment(transitInfo[i].arrivalTime).format(this.config.nextTransitVehicleDepartureFormat) + ")";
+      }
 
       transitLeg.appendChild(routeNumber);
       summaryContainer.appendChild(transitLeg);

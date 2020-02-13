@@ -54,7 +54,7 @@ If you don’t want a header, then just omit it.
   </thead>
   <tbody>
     <tr>
-      <td><code>apiKey</code></td>
+      <td><code>apikey</code></td>
       <td><strong>REQUIRED</strong> API Key from Google<br><br><strong>Type:</strong> <code>string</code></td>
     </tr>
     <tr>
@@ -82,12 +82,28 @@ If you don’t want a header, then just omit it.
       <td>Whether to colour-code the travel time red, yellow, or green based on traffic.<br><br><strong>Type:</strong> <code>boolean</code><br>Defaults to <code>true</code></td>
     </tr>
     <tr>
+      <td><code>travelTimeFormat</code></td>
+      <td>How the module should format your total travel time.<br><br><strong>Type:</strong> <code>string</code><br>Defaults to <code>m [min]</code> (e.g. 86 min).  Some other examples are <code>h[h] m[m]</code> (e.g.: 1h 26min), <code>h:mm</code> (e.g. 1:26).  This uses the <code>moment-duration-format</code> plugin's templating feature.  https://github.com/jsmreese/moment-duration-format#template</td>
+    </tr>
+    <tr>
+      <td><code>travelTimeFormatTrim</code></td>
+      <td>How to handle time tokens that have no value.  For example, if you configure <code>travelTimeFormat</code> as <code>"hh:mm"</code> but the actual travel time is less than an hour, by default only the minute portion of the duration will be rendered.  Set <code>travelTimeFormatTrim</code> to <code>false</code> to preserve the <code>hh:</code> portion of the format (e.g.: <code>00:21</code>).  Valid options are <code>"left"</code>, <code>"right"</code> (e.g.: <code>2:00</code> renders as <code>2</code>), or <code>false</code> (e.g.: do not trim).<br><br><strong>Type:</strong> <code>String</code> or <code>false</code><br>Defaults to <code>"left"</code>.</td>
+    </tr>
+    <tr>
       <td><code>moderateTimeThreshold</code></td>
       <td>The amount of variance between time in traffic vs absolute fastest time after which the time is coloured yellow<br><br><strong>Type:</strong> <code>float</code><br>Defaults to <code>1.1</code> (i.e.: 10% longer than fastest time)</td>
     </tr>
     <tr>
       <td><code>poorTimeThreshold</code></td>
       <td>The amount of variance between time in traffic vs absolute fastest time after which the time is coloured red<br><br><strong>Type:</strong> <code>float</code><br>Defaults to <code>1.3</code> (i.e.: 30% longer than fastest time)</td>
+    </tr>
+    <tr>
+      <td><code>nextTransitVehicleDepartureFormat</code></td>
+      <td>For any transit destinations where <code>showNextVehicleDeparture</code> is true, this dictates how to format the next arrival time.<br><br><strong>Type:</strong> <code>string</code><br>Defaults to <code>[next at] h:mm a</code>.</td>
+    </tr>
+    <tr>
+      <td><code>pollFrequency</code></td>
+      <td>How frequently, in milliseconds, to poll for traffic predictions.<br><strong>BE CAREFUL WITH THIS!</strong>  We're using Google's free API which has a maximum of 2400 requests per day.  Each entry in the destinations list requires its own request so if you set this to be too frequent, it's pretty easy to blow your request quota.<br><br><strong>Type:</strong> <code>number</code>.<br>Defaults to <code>10 * 60 * 1000</code> (i.e.: 600000ms, or every 10 minutes)</td>
     </tr>
     <tr>
       <td><code>destinations</code></td>
@@ -173,8 +189,6 @@ Here is an example of an entry in `config.js`
   module: 'MMM-MyCommute',
   position: 'top_left',
   config: {
-    showHeader: true,
-    headerText: 'Traffic',
     apikey: 'API_KEY_FROM_GOOGLE',
     origin: '65 Front St W, Toronto, ON M5J 1E6',
     startTime: '00:00',

@@ -33,6 +33,7 @@
   line-height: 25px;
   margin-top: 4px;
   margin-bottom: 6px;
+  text-align: left;
 }
 
 .MMM-MyCommute .row.with-multiple-routes .destination-label {
@@ -81,6 +82,7 @@
   margin-bottom: 6px;
   margin-left: 30px;
   /*text-transform: uppercase;*/
+  text-align: left;
 }
 
 .MMM-MyCommute .route-summary-outer {
