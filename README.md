@@ -11,7 +11,7 @@ https://github.com/domsen123/mrx-work-traffic
 # Installation
 1. Navigate into your MagicMirror `modules` folder and execute<br>
 `git clone https://github.com/jclarke0000/MMM-MyCommute.git`.
-2. Enter the `MMM-MyCommute` directory and execute `npm install`.
+2. Enter the `MMM-MyCommute` directory and execute `npm ci`.
 3. Go to https://developers.google.com/maps/documentation/javascript/get-api-key and get an API key.
 
 # NOTE To those updating from previous verions
