@@ -57,7 +57,14 @@ Module.register('MMM-MyCommute', {
       }
     ],
     showCalendarEvents: false,
-    calendarEventConfig: {}
+    calendarEventConfig: {},
+    mqttPublishing: {
+      enabled: false,
+      server: 'http://localhost:1883',
+      username: false,
+      password: false,
+      topicPrefix: 'routes/',
+    }
   },
 
   // Define required scripts.
@@ -198,7 +205,11 @@ Module.register('MMM-MyCommute', {
       this.inWindow = true;
 
       if (destinations.length > 0) {        
-        this.sendSocketNotification("GOOGLE_TRAFFIC_GET", {destinations: destinations, instanceId: this.identifier});
+        this.sendSocketNotification("GOOGLE_TRAFFIC_GET", {
+          destinations: destinations, 
+          instanceId: this.identifier,
+          mqttConfig: this.config.mqttPublishing
+        });
       } else {
         this.hide(1000, {lockString: this.identifier});
         this.inWindow = false;

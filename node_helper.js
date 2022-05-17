@@ -8,6 +8,7 @@
 var NodeHelper = require("node_helper");
 var request = require('request');
 var moment = require('moment');
+var mqtt = require("mqtt");
 
 module.exports = NodeHelper.create({
 
@@ -31,6 +32,18 @@ module.exports = NodeHelper.create({
     var returned = 0;
     var predictions = new Array();
 
+    var mqttClient = null;
+    if (payload.mqttConfig) {
+      console.log("MMM-MyCommute: connecting to MQTT at " + payload.mqttConfig.server);
+      mqttClient = mqtt.connect(payload.mqttConfig.server, {
+        username: payload.mqttConfig.username,
+        password: payload.mqttConfig.password
+      });
+      mqttClient.on('connect', function () { 
+        console.log("MMM-MyCommute: MQTT connected");
+      });
+    }
+
     payload.destinations.forEach(function (dest, index) {
       request({ url: dest.url, method: 'GET' }, function (error, response, body) {
 
@@ -40,7 +53,7 @@ module.exports = NodeHelper.create({
 
         if (!error && response.statusCode == 200) {
 
-          var apiData = JSON.parse(body);
+          var apiData = JSON.parse(body);       
 
           if (apiData.error_message) {
             console.log("MMM-MyCommute: " + apiData.error_message);
@@ -64,17 +77,21 @@ module.exports = NodeHelper.create({
               if (dest.config.mode == 'transit') {
                 routeForFrontend.transitInfo = generateTransitInfo(apiRoute, dest);
               }
-              
+
               routeList.push(routeForFrontend);
             }
             prediction.routes = routeList;
+          }
 
+          if (mqttClient) {
+            var topic = payload.mqttConfig.topicPrefix + prediction.config.label.replace(/[^a-zA-Z0-9 ]/ig, "").replace(/ /, "_").toLowerCase();
+            console.log("MMM-MyCommute: posting prediction to " + topic);
+            mqttClient.publish(topic, JSON.stringify(prediction));
           }
 
         } else {
           console.log("Error getting traffic prediction: " + response.statusCode);
           prediction.error = true;
-
         }
 
         predictions[index] = prediction;
@@ -82,6 +99,10 @@ module.exports = NodeHelper.create({
 
         if (returned == payload.destinations.length) {
           self.sendSocketNotification('GOOGLE_TRAFFIC_RESPONSE' + payload.instanceId, predictions);
+          if (mqttClient) {
+            console.log("MMM-MyCommute: disconnecting MQTT");
+            mqttClient.end();
+          }
         };
 
       });
