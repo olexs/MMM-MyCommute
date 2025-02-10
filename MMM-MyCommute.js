@@ -207,6 +207,7 @@ Module.register('MMM-MyCommute', {
       this.inWindow = true;
 
       if (destinations.length > 0) {
+        console.debug(`Getting data from Google...`);
         this.sendSocketNotification("GOOGLE_TRAFFIC_GET", {
           destinations: destinations,
           instanceId: this.identifier,
@@ -214,13 +215,14 @@ Module.register('MMM-MyCommute', {
         });
         this.lastUpdated = Date.now();
       } else {
+        console.debug(`Not getting data: isInWindow=${isInWindow}, no destinations in window, userPresenseOk=${userPresenseOk}, lastUpdated=${this.lastUpdated}`);
         this.hide(1000, {lockString: this.identifier});
         this.inWindow = false;
         this.isHidden = true;
       }
 
     } else {
-
+      console.debug(`Not getting data: isInWindow=${isInWindow}, userPresenseOk=${userPresenseOk}, lastUpdated=${this.lastUpdated}`);
       this.hide(1000, {lockString: this.identifier});
       this.inWindow = false;
       this.isHidden = true;
@@ -527,9 +529,14 @@ Module.register('MMM-MyCommute', {
     if (notification == 'USER_PRESENCE' && this.config.monitorUserPresence) {
       this.userPresent = !!payload;
 
-      const timeSinceLastUpdate = Date.now() - this.lastUpdated;
+      const timeSinceLastUpdate = Date.now() - (this.lastUpdated ?? 0);
       if (this.userPresent && timeSinceLastUpdate > this.config.pollFrequency) {
+        console.debug('User presence detected, polling for new data');
         this.getData();
+      } else if (this.userPresent) {
+        console.debug('User presence detected, not polling for new data because data was updated recently');
+      } else {
+        console.debug('User absence detected');
       }
     }
 
