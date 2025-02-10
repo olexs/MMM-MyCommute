@@ -22,7 +22,7 @@ You now configure the header in the standard way instead using the `headerText` 
     {
       module: 'MMM-MyCommute',
       position: 'top_left',
-      classes: 'default everyone', 
+      classes: 'default everyone',
       config: {
         showHeader: true,
         headerText: 'Traffic',
@@ -36,7 +36,7 @@ change it to this:
       module: 'MMM-MyCommute',
       position: 'top_left',
       header: 'Traffic',
-      classes: 'default everyone', 
+      classes: 'default everyone',
       config: {
         ...
       }
@@ -116,6 +116,10 @@ If you don’t want a header, then just omit it.
     <tr>
       <td><code>calendarEventConfig</code></td>
       <td>Options to use for event destinations.<br><br><strong>Type:</strong> <code>object</code> (same as normal destination options).<br>Defaults to <code>{}</code> (no specific configuration)</td>
+    </tr>
+    <tr>
+      <td><code>monitorUserPresense</code></td>
+      <td>Monitor the USER_PRESENCE inter-module notification and pause updates when no user is present.<br><br><strong>Type:</strong> <code>boolean</code><br>Defaults to <code>false</code></td>
     </tr>
   </tbody>
 </table>
