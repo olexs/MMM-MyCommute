@@ -182,11 +182,8 @@ Module.register('MMM-MyCommute', {
 
   getData: function () {
 
-    //only poll if in window and if user is present (and user presense monitoring is on)
-    const isInWindow = this.isInWindow(this.config.startTime, this.config.endTime, this.config.hideDays);
-    const userPresenseOk = !this.config.monitorUserPresence || this.userPresent;
-
-    if (isInWindow && userPresenseOk) {
+    //only poll if in window
+    if (this.isInWindow(this.config.startTime, this.config.endTime, this.config.hideDays)) {
       //build URLs
       var destinations = new Array();
       for (var i = 0; i < this.config.destinations.length; i++) {
@@ -207,15 +204,21 @@ Module.register('MMM-MyCommute', {
       this.inWindow = true;
 
       if (destinations.length > 0) {
-        console.info(`Getting data from Google...`);
-        this.sendSocketNotification("GOOGLE_TRAFFIC_GET", {
-          destinations: destinations,
-          instanceId: this.identifier,
-          mqttConfig: this.config.mqttPublishing
-        });
-        this.lastUpdated = Date.now();
+        const userPresenseOk = !this.config.monitorUserPresence || this.userPresent;
+
+        if (userPresenseOk) {
+          console.info(`Getting data from Google...`);
+          this.sendSocketNotification("GOOGLE_TRAFFIC_GET", {
+            destinations: destinations,
+            instanceId: this.identifier,
+            mqttConfig: this.config.mqttPublishing
+          });
+          this.lastUpdated = Date.now();
+        } else {
+          console.info(`Would get data, but user absent. Skipping hiding etc`);
+        }
       } else {
-        console.info(`Not getting data: isInWindow=${isInWindow}, no destinations in window, userPresenseOk=${userPresenseOk}, lastUpdated=${this.lastUpdated}`);
+        console.info(`Not getting data: no destinations in window, userPresenseOk=${userPresenseOk}, lastUpdated=${this.lastUpdated}`);
         this.hide(1000, {lockString: this.identifier});
         this.inWindow = false;
         this.isHidden = true;
