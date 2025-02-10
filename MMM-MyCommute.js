@@ -207,7 +207,7 @@ Module.register('MMM-MyCommute', {
       this.inWindow = true;
 
       if (destinations.length > 0) {
-        console.debug(`Getting data from Google...`);
+        console.info(`Getting data from Google...`);
         this.sendSocketNotification("GOOGLE_TRAFFIC_GET", {
           destinations: destinations,
           instanceId: this.identifier,
@@ -215,14 +215,14 @@ Module.register('MMM-MyCommute', {
         });
         this.lastUpdated = Date.now();
       } else {
-        console.debug(`Not getting data: isInWindow=${isInWindow}, no destinations in window, userPresenseOk=${userPresenseOk}, lastUpdated=${this.lastUpdated}`);
+        console.info(`Not getting data: isInWindow=${isInWindow}, no destinations in window, userPresenseOk=${userPresenseOk}, lastUpdated=${this.lastUpdated}`);
         this.hide(1000, {lockString: this.identifier});
         this.inWindow = false;
         this.isHidden = true;
       }
 
     } else {
-      console.debug(`Not getting data: isInWindow=${isInWindow}, userPresenseOk=${userPresenseOk}, lastUpdated=${this.lastUpdated}`);
+      console.info(`Not getting data: isInWindow=${isInWindow}, userPresenseOk=${userPresenseOk}, lastUpdated=${this.lastUpdated}`);
       this.hide(1000, {lockString: this.identifier});
       this.inWindow = false;
       this.isHidden = true;
@@ -531,12 +531,12 @@ Module.register('MMM-MyCommute', {
 
       const timeSinceLastUpdate = Date.now() - (this.lastUpdated ?? 0);
       if (this.userPresent && timeSinceLastUpdate > this.config.pollFrequency) {
-        console.debug('User presence detected, polling for new data');
+        console.info('User presence detected, polling for new data');
         this.getData();
       } else if (this.userPresent) {
-        console.debug('User presence detected, not polling for new data because data was updated recently');
+        console.info('User presence detected, not polling for new data because data was updated recently');
       } else {
-        console.debug('User absence detected');
+        console.info('User absence detected');
       }
     }
 
