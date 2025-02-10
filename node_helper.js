@@ -19,10 +19,8 @@ module.exports = NodeHelper.create({
   // subclass socketNotificationReceived
   socketNotificationReceived: function (notification, payload) {
     if (notification === 'GOOGLE_TRAFFIC_GET') {
-
       //first data opull after new config
       this.getPredictions(payload);
-
     }
   },
 
@@ -30,7 +28,7 @@ module.exports = NodeHelper.create({
     var self = this;
 
     var returned = 0;
-    var predictions = new Array();
+    var predictions = [];
 
     var mqttClient = null;
     if (payload.mqttConfig) {
@@ -39,13 +37,13 @@ module.exports = NodeHelper.create({
         username: payload.mqttConfig.username,
         password: payload.mqttConfig.password
       });
-      mqttClient.on('connect', function () { 
+      mqttClient.on('connect', function () {
         console.log("MMM-MyCommute: MQTT connected");
       });
     }
 
     payload.destinations.forEach(function (dest, index) {
-      request({ url: dest.url, method: 'GET' }, function (error, response, body) {
+      request({url: dest.url, method: 'GET'}, function (error, response, body) {
 
         var prediction = new Object({
           config: dest.config
@@ -53,7 +51,7 @@ module.exports = NodeHelper.create({
 
         if (!error && response.statusCode == 200) {
 
-          var apiData = JSON.parse(body);       
+          var apiData = JSON.parse(body);
 
           if (apiData.error_message) {
             console.log("MMM-MyCommute: " + apiData.error_message);
@@ -103,8 +101,7 @@ module.exports = NodeHelper.create({
             console.log("MMM-MyCommute: disconnecting MQTT");
             mqttClient.end();
           }
-        };
-
+        }
       });
     });
   }
@@ -112,7 +109,7 @@ module.exports = NodeHelper.create({
 });
 
 function generateTransitInfo(apiRoute, dest) {
-  var transitInfo = new Array();
+  var transitInfo = [];
   var gotFirstTransitLeg = false;
   for (var j = 0; j < apiRoute.legs[0].steps.length; j++) {
     var apiRouteStep = apiRoute.legs[0].steps[j];
